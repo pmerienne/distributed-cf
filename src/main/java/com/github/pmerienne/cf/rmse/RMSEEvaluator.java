@@ -28,7 +28,7 @@ import backtype.storm.tuple.Values;
 
 import com.github.pmerienne.cf.DSGD;
 import com.github.pmerienne.cf.rating.Rating;
-import com.github.pmerienne.cf.testing.DRPCUtils;
+import com.github.pmerienne.cf.util.DRPCUtils;
 import com.github.pmerienne.cf.util.ListUtils;
 
 public class RMSEEvaluator {
