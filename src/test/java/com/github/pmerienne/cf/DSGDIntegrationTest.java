@@ -50,7 +50,7 @@ import com.github.pmerienne.cf.util.DRPCUtils;
 
 public class DSGDIntegrationTest {
 
-	private static final long TEST_TIMEOUT = 10000;
+	private static final long BASE_TEST_TIMEOUT = 10000;
 	private static final double TRAINING_PERCENT = 0.80;
 
 	protected LocalDRPC drpc;
@@ -98,7 +98,7 @@ public class DSGDIntegrationTest {
 
 		// When
 		this.cluster.submitTopology(this.getClass().getSimpleName(), config, topology.build());
-		Utils.sleep(TEST_TIMEOUT);
+		Utils.sleep(BASE_TEST_TIMEOUT);
 		String drpcResult = this.drpc.execute("recommendations", Long.toString(testUser));
 
 		// Then
@@ -134,7 +134,7 @@ public class DSGDIntegrationTest {
 
 		// When
 		this.cluster.submitTopology(this.getClass().getSimpleName(), config, topology.build());
-		Utils.sleep(TEST_TIMEOUT);
+		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		final double prediction1 = DRPCUtils.<Double> extractSingleValue(this.drpc.execute("predictions", rating1.i + " " + rating1.j), 2);
 		final double prediction2 = DRPCUtils.<Double> extractSingleValue(this.drpc.execute("predictions", rating2.i + " " + rating2.j), 2);
@@ -163,7 +163,7 @@ public class DSGDIntegrationTest {
 
 		// When
 		this.cluster.submitTopology(this.getClass().getSimpleName(), config, topology.build());
-		Utils.sleep(TEST_TIMEOUT);
+		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
 		double trainingRMSE = rmseEvaluator.rmse(training);
@@ -194,7 +194,7 @@ public class DSGDIntegrationTest {
 		this.cluster.submitTopology(this.getClass().getSimpleName(), config, topology.build());
 
 		// When
-		Utils.sleep(TEST_TIMEOUT);
+		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
 		double trainingRMSE = rmseEvaluator.rmse(newTraining);
@@ -205,7 +205,7 @@ public class DSGDIntegrationTest {
 	}
 
 	@Test
-	public void should_predict_successfully_after_concept_drift() {
+	public void should_support_concept_drift() {
 		// Given
 		List<Rating> firstConceptTraining = generateRatings(0, 0, 500, 100, true);
 		List<Rating> firstConceptEval = extractEval(firstConceptTraining, TRAINING_PERCENT);
@@ -226,10 +226,10 @@ public class DSGDIntegrationTest {
 
 		// When
 		ratingsModel.setRatings(firstConceptTraining);
-		Utils.sleep(TEST_TIMEOUT);
+		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		ratingsModel.setRatings(secondConceptTraining);
-		Utils.sleep(TEST_TIMEOUT);
+		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
 		double firstConceptTrainingRMSE = rmseEvaluator.rmse(firstConceptTraining);
@@ -241,6 +241,31 @@ public class DSGDIntegrationTest {
 		assertThat(firstConceptEvalRMSE).isLessThan(0.3);
 		assertThat(secondConceptTrainingRMSE).isLessThan(0.3);
 		assertThat(secondConceptEvalRMSE).isLessThan(0.3);
+	}
+
+	@Test
+	public void should_not_overfit() {
+		// Given
+		List<Rating> training = MovieLensDataset.get();
+		List<Rating> eval = DatasetUtils.extractEval(training, TRAINING_PERCENT);
+
+		Stream ratingsStream = this.topology.newStream("ratings", new FixedRatingsSpout(training));
+		Stream predictionQueryStream = this.topology.newDRPCStream("predictions", this.drpc).each(new Fields("args"), new ExtractPredictionRequest(), new Fields("i", "j"));
+
+		DSGD dsgd = new DSGD(this.topology, ratingsStream, options, config);
+		dsgd.addPredictionStream(predictionQueryStream);
+
+		RMSEEvaluator rmseEvaluator = new RMSEEvaluator(dsgd, topology, drpc);
+
+		// When
+		this.cluster.submitTopology(this.getClass().getSimpleName(), config, topology.build());
+		Utils.sleep(BASE_TEST_TIMEOUT);
+		double originalRMSE = rmseEvaluator.rmse(eval);
+		Utils.sleep(BASE_TEST_TIMEOUT * 2);
+		double afterRMSE = rmseEvaluator.rmse(eval);
+
+		// Then
+		assertThat(afterRMSE - originalRMSE).isLessThan(0.01);
 	}
 
 }
