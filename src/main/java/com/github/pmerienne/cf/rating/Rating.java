@@ -65,9 +65,6 @@ public class Rating implements Serializable {
 		int result = 1;
 		result = prime * result + (int) (i ^ (i >>> 32));
 		result = prime * result + (int) (j ^ (j >>> 32));
-		long temp;
-		temp = Double.doubleToLongBits(value);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -83,8 +80,6 @@ public class Rating implements Serializable {
 		if (i != other.i)
 			return false;
 		if (j != other.j)
-			return false;
-		if (Double.doubleToLongBits(value) != Double.doubleToLongBits(other.value))
 			return false;
 		return true;
 	}

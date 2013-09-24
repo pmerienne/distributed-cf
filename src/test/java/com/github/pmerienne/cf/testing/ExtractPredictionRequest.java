@@ -13,30 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.cf.rmse;
+package com.github.pmerienne.cf.testing;
 
-public class RMSEBenchmarkResult {
+import storm.trident.operation.BaseFunction;
+import storm.trident.operation.TridentCollector;
+import storm.trident.tuple.TridentTuple;
+import backtype.storm.tuple.Values;
 
-	private final double training;
-	private final double eval;
+public class ExtractPredictionRequest extends BaseFunction {
 
-	public RMSEBenchmarkResult(double training, double eval) {
-		super();
-		this.training = training;
-		this.eval = eval;
-	}
-
-	public double getTraining() {
-		return training;
-	}
-
-	public double getEval() {
-		return eval;
-	}
+	private static final long serialVersionUID = 7171566985006542069L;
 
 	@Override
-	public String toString() {
-		return "RMSEBenchmarkResult [training=" + training + ", eval=" + eval + "]";
+	public void execute(TridentTuple tuple, TridentCollector collector) {
+		String[] args = tuple.getString(0).split(" ");
+		long i = Long.parseLong(args[0]);
+		long j = Long.parseLong(args[1]);
+		collector.emit(new Values(i, j));
 	}
-
 }

@@ -15,10 +15,7 @@
  */
 package com.github.pmerienne.cf.testing;
 
-import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
 
 import storm.trident.operation.TridentCollector;
 import storm.trident.spout.IBatchSpout;
@@ -29,55 +26,39 @@ import backtype.storm.tuple.Values;
 
 import com.github.pmerienne.cf.rating.Rating;
 
-public class FixedRatingsSpout implements IBatchSpout {
+/**
+ * Not thread safe !!!
+ * 
+ * @author pmerienne
+ * 
+ */
+public class ModelBasedRatingsSpout implements IBatchSpout {
 
 	private static final long serialVersionUID = 8566700111208314156L;
 
-	private final static Logger LOGGER = Logger.getLogger(FixedRatingsSpout.class);
 	private static final int DEFAULT_MAX_BATCH_SIZE = 10000;
 
-	private int currentIndex = 0;
-	private final List<Rating> ratings;
-
-	private boolean hasLoggedNoMoreRatings = false;
+	private final RatingModel ratingModel;
 	private final int maxBatchSize;
 
-	public FixedRatingsSpout(List<Rating> ratings) {
-		this(ratings, DEFAULT_MAX_BATCH_SIZE);
+	public ModelBasedRatingsSpout(RatingModel ratingModel) {
+		this(ratingModel, DEFAULT_MAX_BATCH_SIZE);
 	}
 
-	public FixedRatingsSpout(List<Rating> ratings, int maxBatchSize) {
-		this.ratings = ratings;
+	public ModelBasedRatingsSpout(RatingModel ratingModel, int maxBatchSize) {
+		this.ratingModel = ratingModel;
 		this.maxBatchSize = maxBatchSize;
 	}
 
 	@Override
 	public void emitBatch(long batchId, TridentCollector collector) {
-		if (this.hasNext()) {
-			List<Rating> ratings = this.nextBatch();
+		int i = 0;
 
-			for (Rating rating : ratings) {
-				collector.emit(new Values(rating.i, rating.j, rating.value));
-			}
-		} else if (!hasLoggedNoMoreRatings) {
-			this.hasLoggedNoMoreRatings = true;
-			LOGGER.info("All ratings (" + this.ratings.size() + ") were send");
+		while (this.ratingModel != null && this.ratingModel.hasNext() && i < this.maxBatchSize) {
+			Rating rating = this.ratingModel.next();
+			collector.emit(new Values(rating.i, rating.j, rating.value));
+			i++;
 		}
-	}
-
-	private boolean hasNext() {
-		return this.currentIndex + 1 < this.ratings.size();
-	}
-
-	private List<Rating> nextBatch() {
-		int fromIndex = this.currentIndex;
-		int toIndex = this.currentIndex + this.maxBatchSize;
-		if (toIndex >= this.ratings.size()) {
-			toIndex = this.ratings.size() - 1;
-		}
-		this.currentIndex += toIndex - fromIndex;
-
-		return this.ratings.subList(fromIndex, toIndex);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -104,5 +85,13 @@ public class FixedRatingsSpout implements IBatchSpout {
 
 	@Override
 	public void ack(long batchId) {
+	}
+
+	public static interface RatingModel {
+
+		boolean hasNext();
+
+		Rating next();
+
 	}
 }

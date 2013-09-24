@@ -15,40 +15,42 @@
  */
 package com.github.pmerienne.cf.rating;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import storm.trident.operation.CombinerAggregator;
 import storm.trident.tuple.TridentTuple;
 
-public class RatingsAggregator implements CombinerAggregator<List<Rating>> {
+public class RatingsAggregator implements CombinerAggregator<Set<Rating>> {
 
 	private static final long serialVersionUID = 7700181561922363727L;
 
 	@Override
-	public List<Rating> init(TridentTuple tuple) {
+	public Set<Rating> init(TridentTuple tuple) {
 		long i = tuple.getLong(0);
 		long j = tuple.getLong(1);
 		double value = tuple.getDouble(2);
 
-		return Arrays.asList(new Rating(i, j, value));
+		Set<Rating> ratings = this.zero();
+		ratings.add(new Rating(i, j, value));
+
+		return ratings;
 	}
 
 	@Override
-	public List<Rating> combine(List<Rating> val1, List<Rating> val2) {
-		List<Rating> ratings = new ArrayList<>(val1.size() + val2.size());
-		for (Rating rating : val1) {
+	public Set<Rating> combine(Set<Rating> val1, Set<Rating> val2) {
+		Set<Rating> ratings = new HashSet<>(val1.size() + val2.size());
+		for (Rating rating : val2) {
 			ratings.add(rating);
 		}
-		for (Rating rating : val2) {
+		for (Rating rating : val1) {
 			ratings.add(rating);
 		}
 		return ratings;
 	}
 
 	@Override
-	public List<Rating> zero() {
-		return new ArrayList<>();
+	public Set<Rating> zero() {
+		return new HashSet<>();
 	}
 }

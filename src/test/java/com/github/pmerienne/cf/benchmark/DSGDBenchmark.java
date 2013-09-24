@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.cf;
+package com.github.pmerienne.cf.benchmark;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.pmerienne.cf.DSGD.Options;
-import com.github.pmerienne.cf.dataset.MovieLensDataset;
-import com.github.pmerienne.cf.rmse.RMSEBenchmarkResult;
-import com.github.pmerienne.cf.testing.DSGDRunner;
+import com.github.pmerienne.cf.testing.dataset.MovieLensDataset;
 
 public class DSGDBenchmark {
 

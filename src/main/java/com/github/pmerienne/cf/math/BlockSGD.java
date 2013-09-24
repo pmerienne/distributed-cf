@@ -15,9 +15,8 @@
  */
 package com.github.pmerienne.cf.math;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.math.RandomUtils;
 
@@ -70,9 +69,9 @@ public class BlockSGD extends BaseFunction {
 				vq = new MatrixBlock();
 			}
 
-			List<Rating> ratings = (List<Rating>) tuple.get(2);
+			Set<Rating> ratings = (Set<Rating>) tuple.get(2);
 			if (ratings == null) {
-				ratings = new ArrayList<>();
+				ratings = new HashSet<>();
 			}
 
 			this.process(up, vq, ratings);
@@ -94,8 +93,8 @@ public class BlockSGD extends BaseFunction {
 	 * @param vq
 	 * @param ratings
 	 */
-	public void process(MatrixBlock up, MatrixBlock vq, List<Rating> ratings) {
-		Collections.shuffle(ratings);
+	public void process(MatrixBlock up, MatrixBlock vq, Set<Rating> ratings) {
+		// TODO : shuffle ratings
 
 		for (Rating rating : ratings) {
 			long i = rating.getI();

@@ -29,16 +29,16 @@ import storm.trident.state.map.MapState;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.tuple.Values;
 
-public class GetRatedItems extends BaseQueryFunction<MapState<List<Rating>>, List<Rating>> {
+public class GetRatedItems extends BaseQueryFunction<MapState<Set<Rating>>, Set<Rating>> {
 
 	private static final long serialVersionUID = 3569123559849366626L;
 
 	@Override
-	public List<List<Rating>> batchRetrieve(MapState<List<Rating>> state, List<TridentTuple> tuples) {
-		List<List<Rating>> results = new ArrayList<>(tuples.size());
+	public List<Set<Rating>> batchRetrieve(MapState<Set<Rating>> state, List<TridentTuple> tuples) {
+		List<Set<Rating>> results = new ArrayList<>(tuples.size());
 
 		List<List<Object>> keys;
-		List<Rating> blockRatings;
+		Set<Rating> blockRatings;
 		for (TridentTuple tuple : tuples) {
 			long p = tuple.getLong(1);
 			long q = tuple.getLong(2);
@@ -53,7 +53,7 @@ public class GetRatedItems extends BaseQueryFunction<MapState<List<Rating>>, Lis
 	}
 
 	@Override
-	public void execute(TridentTuple tuple, List<Rating> blockRatings, TridentCollector collector) {
+	public void execute(TridentTuple tuple, Set<Rating> blockRatings, TridentCollector collector) {
 		long user = tuple.getLong(0);
 		Set<Long> ratedItems = new HashSet<>();
 

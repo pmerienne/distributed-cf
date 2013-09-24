@@ -15,35 +15,40 @@
  */
 package com.github.pmerienne.cf.testing;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.github.pmerienne.cf.rating.Rating;
+import com.github.pmerienne.cf.testing.ModelBasedRatingsSpout.RatingModel;
 
-public class DatasetUtils {
+public class RatingModelFromList implements RatingModel, Serializable {
 
-	public static List<Rating> extractEval(List<Rating> ratings, double trainingPercent) {
-		int evalSize = (int) (ratings.size() * (1.0 - trainingPercent));
-		List<Rating> eval = new ArrayList<>(evalSize);
+	private static final long serialVersionUID = 4651474312812074591L;
 
-		Set<Long> knownUsers = new HashSet<>();
-		Set<Long> knownItems = new HashSet<>();
+	private static Iterator<Rating> it;
 
-		Iterator<Rating> it = ratings.iterator();
-		while (it.hasNext() && eval.size() < evalSize) {
-			Rating rating = it.next();
-
-			if (knownUsers.contains(rating.i) && knownItems.contains(rating.j)) {
-				eval.add(rating);
-				it.remove();
-			}
-			knownUsers.add(rating.i);
-			knownItems.add(rating.j);
-		}
-
-		return eval;
+	public RatingModelFromList() {
+		this(new ArrayList<Rating>());
 	}
+
+	public RatingModelFromList(List<Rating> ratings) {
+		it = ratings.iterator();
+	}
+
+	public void setRatings(List<Rating> ratings) {
+		it = ratings.iterator();
+	}
+
+	@Override
+	public boolean hasNext() {
+		return it.hasNext();
+	}
+
+	@Override
+	public Rating next() {
+		return it.next();
+	}
+
 }

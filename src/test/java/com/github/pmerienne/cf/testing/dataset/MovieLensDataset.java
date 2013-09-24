@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.cf.dataset;
+package com.github.pmerienne.cf.testing.dataset;
 
 import java.io.BufferedReader;
 import java.io.File;

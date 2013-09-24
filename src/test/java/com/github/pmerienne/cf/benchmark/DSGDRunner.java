@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.pmerienne.cf.testing;
+package com.github.pmerienne.cf.benchmark;
 
 import java.util.List;
 
@@ -26,8 +26,9 @@ import backtype.storm.LocalDRPC;
 import com.github.pmerienne.cf.DSGD;
 import com.github.pmerienne.cf.DSGD.Options;
 import com.github.pmerienne.cf.rating.Rating;
-import com.github.pmerienne.cf.rmse.RMSEBenchmarkResult;
 import com.github.pmerienne.cf.rmse.RMSEEvaluator;
+import com.github.pmerienne.cf.testing.FixedRatingsSpout;
+import com.github.pmerienne.cf.testing.dataset.DatasetUtils;
 
 public class DSGDRunner {
 
@@ -73,7 +74,7 @@ public class DSGDRunner {
 	private RMSEBenchmarkResult computeRMSE() {
 		try {
 			Config config = new Config();
-			
+
 			Stream ratings = this.topology.newStream("ratings", new FixedRatingsSpout(this.trainingRatings));
 			DSGD dsgd = new DSGD(this.topology, ratings, options, config);
 			RMSEEvaluator rmseEvaluator = new RMSEEvaluator(dsgd, topology, drpc);
