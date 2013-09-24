@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.pmerienne.cf.DSGD.Options;
-import com.github.pmerienne.cf.testing.dataset.MovieLensDataset;
+import com.github.pmerienne.cf.testing.dataset.FileDatasetUtil;
 
 public class DSGDBenchmark {
 
@@ -69,7 +69,7 @@ public class DSGDBenchmark {
 	}
 
 	private RMSEBenchmarkResult computeRMSE(Options options) {
-		DSGDRunner benchmark = new DSGDRunner(MovieLensDataset.get(), options, BENCHMARK_TIMEOUT);
+		DSGDRunner benchmark = new DSGDRunner(FileDatasetUtil.getMovieLensRatings(), options, BENCHMARK_TIMEOUT);
 		return benchmark.run();
 	}
 

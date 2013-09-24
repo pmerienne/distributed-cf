@@ -45,7 +45,7 @@ import com.github.pmerienne.cf.testing.FixedRatingsSpout;
 import com.github.pmerienne.cf.testing.ModelBasedRatingsSpout;
 import com.github.pmerienne.cf.testing.RatingModelFromList;
 import com.github.pmerienne.cf.testing.dataset.DatasetUtils;
-import com.github.pmerienne.cf.testing.dataset.MovieLensDataset;
+import com.github.pmerienne.cf.testing.dataset.FileDatasetUtil;
 import com.github.pmerienne.cf.util.DRPCUtils;
 
 public class DSGDIntegrationTest {
@@ -150,7 +150,7 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_learn_movielens100k_dataset() {
 		// Given
-		List<Rating> training = MovieLensDataset.get();
+		List<Rating> training = FileDatasetUtil.getMovieLensRatings();
 		List<Rating> eval = DatasetUtils.extractEval(training, TRAINING_PERCENT);
 
 		Stream ratingsStream = this.topology.newStream("ratings", new FixedRatingsSpout(training));
@@ -246,7 +246,7 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_not_overfit() {
 		// Given
-		List<Rating> training = MovieLensDataset.get();
+		List<Rating> training = FileDatasetUtil.getMovieLensRatings();
 		List<Rating> eval = DatasetUtils.extractEval(training, TRAINING_PERCENT);
 
 		Stream ratingsStream = this.topology.newStream("ratings", new FixedRatingsSpout(training));
