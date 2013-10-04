@@ -15,8 +15,8 @@
  */
 package com.github.pmerienne.cf.math;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.commons.lang.math.RandomUtils;
 
@@ -69,7 +69,7 @@ public class BlockSGD extends BaseFunction {
 				vq = new MatrixBlock();
 			}
 
-			Set<Rating> ratings = (Set<Rating>) tuple.get(2);
+			Collection<Rating> ratings = (Collection<Rating>) tuple.get(2);
 			if (ratings == null) {
 				ratings = new HashSet<>();
 			}
@@ -93,7 +93,7 @@ public class BlockSGD extends BaseFunction {
 	 * @param vq
 	 * @param ratings
 	 */
-	public void process(MatrixBlock up, MatrixBlock vq, Set<Rating> ratings) {
+	public void process(MatrixBlock up, MatrixBlock vq, Collection<Rating> ratings) {
 		// TODO : shuffle ratings
 
 		for (Rating rating : ratings) {

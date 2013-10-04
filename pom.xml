@@ -19,7 +19,7 @@
 	</properties>
 
 	<repositories>
-		<!-- For storm -->
+		<!-- For storm and trident-extended-state -->
 		<repository>
 			<id>clojars.org</id>
 			<url>http://clojars.org/repo</url>
@@ -31,6 +31,12 @@
 			<groupId>storm</groupId>
 			<artifactId>storm</artifactId>
 			<version>${storm.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.pmerienne</groupId>
+			<artifactId>trident-extended-state</artifactId>
+			<version>0.0.2</version>
 		</dependency>
 
 		<!-- Utils -->

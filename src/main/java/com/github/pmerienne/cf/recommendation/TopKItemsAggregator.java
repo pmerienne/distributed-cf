@@ -15,7 +15,7 @@
  */
 package com.github.pmerienne.cf.recommendation;
 
-import java.util.Set;
+import java.util.Collection;
 
 import storm.trident.operation.CombinerAggregator;
 import storm.trident.tuple.TridentTuple;
@@ -39,7 +39,7 @@ public class TopKItemsAggregator implements CombinerAggregator<TopKItems> {
 		TopKItems initial = new TopKItems(this.k);
 
 		double[] ui = (double[]) tuple.get(0);
-		Set<Long> ratedItems = (Set<Long>) tuple.get(1);
+		Collection<Long> ratedItems = (Collection<Long>) tuple.get(1);
 		MatrixBlock vq = (MatrixBlock) tuple.get(2);
 
 		double[] vj;

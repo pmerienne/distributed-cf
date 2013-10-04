@@ -66,7 +66,7 @@ public class DSGDIntegrationTest {
 		this.topology = new TridentTopology();
 
 		this.options = new Options();
-		this.options.d = 2;
+		this.options.d = 10;
 		this.options.k = 10;
 		this.options.lambda = 0.1;
 		this.options.stepSize = 0.1;
@@ -121,7 +121,7 @@ public class DSGDIntegrationTest {
 	public void should_predict_successfully() {
 		// Given
 		long testUser = 1;
-		List<Rating> allRatings = generateRatings(100, 200, true);
+		List<Rating> allRatings = generateRatings(500, 200, true);
 		List<Rating> removedRatings = removeRandomRatings(testUser, 2, allRatings);
 		Rating rating1 = removedRatings.get(0);
 		Rating rating2 = removedRatings.get(1);

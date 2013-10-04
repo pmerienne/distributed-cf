@@ -32,13 +32,17 @@ import com.github.pmerienne.cf.block.MatrixBlock;
 import com.github.pmerienne.cf.features.GetFeatures;
 import com.github.pmerienne.cf.math.BlockSGD;
 import com.github.pmerienne.cf.math.DotProduct;
+import com.github.pmerienne.cf.rating.AssignRatingsToBlock;
 import com.github.pmerienne.cf.rating.GetRatedItems;
+import com.github.pmerienne.cf.rating.GetRatingsFromBlock;
 import com.github.pmerienne.cf.rating.Rating;
-import com.github.pmerienne.cf.rating.RatingsAggregator;
 import com.github.pmerienne.cf.recommendation.TopKItemsAggregator;
 import com.github.pmerienne.cf.recommendation.TopKItemsToValues;
 import com.github.pmerienne.cf.util.MapPut;
 import com.github.pmerienne.cf.util.RichSpoutBatchExecutor;
+import com.github.pmerienne.trident.state.ExtendedStateFactory;
+import com.github.pmerienne.trident.state.MapMultimapState;
+import com.github.pmerienne.trident.state.memory.MemoryMapMultimapState;
 
 /**
  * Builds a cf algorithm over a {@link TridentTopology}. online collaborative
@@ -91,10 +95,8 @@ public class DSGD {
 		ratings
 		// Get block indexes
 		.each(new Fields("i", "j"), new BlockAssigner(options.d), new Fields("p", "q"))
-		// Group ratings pet block
-				.groupBy(new Fields("p", "q"))
-				// Persists rating list ratings into blocks
-				.persistentAggregate(options.ratingsBlockStateFactory, new Fields("i", "j", "value"), new RatingsAggregator(), new Fields("ratingList")).parallelismHint(options.newRatingsParallelism);
+		// Add ratings to block
+		.partitionPersist(options.ratingsBlockStateFactory, new Fields("i", "j", "value"), new AssignRatingsToBlock(options.d));
 	}
 
 	private void processDSGD() {
@@ -103,7 +105,7 @@ public class DSGD {
 		// Get blocks
 				.stateQuery(this.userBlockState, new Fields("p"), new MapGet(), new Fields("up")).stateQuery(this.itemBlockState, new Fields("q"), new MapGet(), new Fields("vq"))
 				// Get ratings
-				.stateQuery(this.ratingsBlockState, new Fields("p", "q"), new MapGet(), new Fields("ratings"))
+				.stateQuery(this.ratingsBlockState, new Fields("p", "q"), new GetRatingsFromBlock(), new Fields("ratings"))
 				// Process blocks
 				.each(new Fields("up", "vq", "ratings"), new BlockSGD(options.stepSize, options.lambda, options.k), new Fields("newUp", "newVq")).parallelismHint((int) options.d);
 
@@ -156,7 +158,8 @@ public class DSGD {
 		public int recommendationsParallelism = 10;
 		public int newRatingsParallelism = 10;
 
-		public StateFactory ratingsBlockStateFactory = new MemoryMapState.Factory();
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public ExtendedStateFactory<MapMultimapState> ratingsBlockStateFactory = new MemoryMapMultimapState.Factory();
 		public StateFactory userBlockStateFactory = new MemoryMapState.Factory();
 		public StateFactory itemBlockStateFactory = new MemoryMapState.Factory();
 	}

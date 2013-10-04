@@ -15,51 +15,26 @@
  */
 package com.github.pmerienne.cf.rating;
 
-import static com.github.pmerienne.cf.util.MapStateUtil.singleValue;
-import static com.github.pmerienne.cf.util.MapStateUtil.toKeys;
-
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import storm.trident.operation.TridentCollector;
-import storm.trident.state.BaseQueryFunction;
-import storm.trident.state.map.MapState;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.tuple.Values;
 
-public class GetRatedItems extends BaseQueryFunction<MapState<Set<Rating>>, Set<Rating>> {
+public class GetRatedItems extends GetRatingsFromBlock {
 
 	private static final long serialVersionUID = 3569123559849366626L;
 
 	@Override
-	public List<Set<Rating>> batchRetrieve(MapState<Set<Rating>> state, List<TridentTuple> tuples) {
-		List<Set<Rating>> results = new ArrayList<>(tuples.size());
-
-		List<List<Object>> keys;
-		Set<Rating> blockRatings;
-		for (TridentTuple tuple : tuples) {
-			long p = tuple.getLong(1);
-			long q = tuple.getLong(2);
-
-			keys = toKeys(p, q);
-			blockRatings = singleValue(state.multiGet(keys));
-
-			results.add(blockRatings);
-		}
-
-		return results;
-	}
-
-	@Override
-	public void execute(TridentTuple tuple, Set<Rating> blockRatings, TridentCollector collector) {
-		long user = tuple.getLong(0);
+	public void execute(TridentTuple tuple, Collection<Rating> blockRatings, TridentCollector collector) {
 		Set<Long> ratedItems = new HashSet<>();
-
-		for (Rating rated : blockRatings) {
-			if (rated.i == user) {
-				ratedItems.add(rated.j);
+		
+		final long user = tuple.getLong(0);
+		for(Rating rating : blockRatings) {
+			if(rating.i == user) {
+				ratedItems.add(rating.j);
 			}
 		}
 
