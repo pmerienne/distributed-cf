@@ -30,8 +30,13 @@ public class RMSE {
 		this.min = Math.min(this.min, expected);
 	}
 
-	public double getNormalized() {
+	public double get() {
 		double rmsd = Math.sqrt(this.sum / this.n);
+		return rmsd;
+	}
+
+	public double getNormalized() {
+		double rmsd = this.get();
 		return rmsd / (this.max - this.min);
 	}
 

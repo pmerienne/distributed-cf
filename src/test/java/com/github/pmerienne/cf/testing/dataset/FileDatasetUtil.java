@@ -104,9 +104,8 @@ public class FileDatasetUtil {
 			long user = Long.parseLong(values[0]);
 			long item = Long.parseLong(values[1]);
 			double stars = Integer.parseInt(values[2]);
-			double value = (stars / 5);
 
-			return new Rating(user, item, value);
+			return new Rating(user, item, stars);
 		}
 
 	}

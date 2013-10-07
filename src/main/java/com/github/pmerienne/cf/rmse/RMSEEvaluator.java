@@ -63,7 +63,7 @@ public class RMSEEvaluator {
 			rmse.add(expected, actual);
 		}
 
-		return rmse.getNormalized();
+		return rmse.get();
 	}
 
 	protected double getPrediction(Rating rating) {
