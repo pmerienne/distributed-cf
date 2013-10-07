@@ -120,15 +120,15 @@ public class DSGD {
 		// TODO : optimize this!
 		return recommendationRequests
 		// Get user features
-				.stateQuery(this.userBlockState, new Fields("i"), new GetFeatures(options.d), new Fields("ui"))
+				.stateQuery(this.userBlockState, new Fields("i"), new GetFeatures(options.d), new Fields("ui", "bi"))
 				// Get all user blocks
 				.each(new Fields("i"), new GetAllBlocksForUser(options.d), new Fields("p", "q")).shuffle()
 				// Get rated item
-				.stateQuery(this.ratingsBlockState, new Fields("i", "p", "q"), new GetRatedItems(), new Fields("ratedItems"))
+				.stateQuery(this.ratingsBlockState, new Fields("p", "q", "i"), new GetRatedItems(), new Fields("ratedItems"))
 				// Get items matrix block
 				.stateQuery(this.itemBlockState, new Fields("q"), new MapGet(), new Fields("vq")).parallelismHint(options.recommendationsParallelism)
 				// Aggregate result to keep top k rating
-				.aggregate(new Fields("ui", "ratedItems", "vq"), new TopKItemsAggregator(k), new Fields("topKItems"))
+				.aggregate(new Fields("ui", "bi", "ratedItems", "vq"), new TopKItemsAggregator(k), new Fields("topKItems"))
 				// Convert to values
 				.each(new Fields("topKItems"), new TopKItemsToValues(), new Fields("item", "score"))
 				// Project interesting fields

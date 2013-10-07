@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.math.RandomUtils;
+
 import com.github.pmerienne.cf.rating.Rating;
 import com.github.pmerienne.cf.util.ListUtils;
 import com.google.common.base.Predicate;
@@ -52,17 +54,27 @@ public class DatasetUtils {
 		return eval;
 	}
 
-	public static List<Rating> generateRatings(long userCount, long itemCount, boolean asc) {
-		return generateRatings(0, 0, userCount, itemCount, asc);
+	public static List<Rating> generateSparseRatings(long userCount, long itemCount, boolean asc) {
+		return generateSparseRatings(0, 0, userCount, itemCount, asc);
 	}
 
-	public static List<Rating> generateRatings(long userOffset, long itemOffset, long userCount, long itemCount, boolean asc) {
+	public static List<Rating> generateSparseRatings(long userOffset, long itemOffset, long userCount, long itemCount, boolean asc) {
+		return generateSparseRatings(0.20, userOffset, itemOffset, userCount, itemCount, asc);
+	}
+
+	public static List<Rating> generateSparseRatings(double sparsity, long userCount, long itemCount, boolean asc) {
+		return generateSparseRatings(sparsity, 0, 0, userCount, itemCount, asc);
+	}
+
+	public static List<Rating> generateSparseRatings(double sparsity, long userOffset, long itemOffset, long userCount, long itemCount, boolean asc) {
 		List<Rating> allRatings = new ArrayList<>();
 
 		for (long i = userOffset; i < userCount + userOffset; i++) {
 			for (long j = itemOffset; j < itemOffset + itemCount; j++) {
-				double value = asc ? (double) j / (double) itemCount + itemOffset : 1 - (double) j / ((double) itemCount + (double) itemOffset);
-				allRatings.add(new Rating(i, j, value));
+				if (RandomUtils.nextDouble() > sparsity) {
+					double value = asc ? (double) j / (double) itemCount + itemOffset : 1 - (double) j / ((double) itemCount + (double) itemOffset);
+					allRatings.add(new Rating(i, j, value));
+				}
 			}
 		}
 

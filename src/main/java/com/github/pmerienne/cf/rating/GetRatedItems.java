@@ -31,7 +31,7 @@ public class GetRatedItems extends GetRatingsFromBlock {
 	public void execute(TridentTuple tuple, Collection<Rating> blockRatings, TridentCollector collector) {
 		Set<Long> ratedItems = new HashSet<>();
 		
-		final long user = tuple.getLong(0);
+		final long user = tuple.getLong(2);
 		for(Rating rating : blockRatings) {
 			if(rating.i == user) {
 				ratedItems.add(rating.j);

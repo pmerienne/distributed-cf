@@ -21,7 +21,7 @@ import storm.trident.operation.CombinerAggregator;
 import storm.trident.tuple.TridentTuple;
 
 import com.github.pmerienne.cf.block.MatrixBlock;
-import com.github.pmerienne.cf.util.MathUtil;
+import com.github.pmerienne.cf.math.Prediction;
 
 public class TopKItemsAggregator implements CombinerAggregator<TopKItems> {
 
@@ -29,6 +29,8 @@ public class TopKItemsAggregator implements CombinerAggregator<TopKItems> {
 
 	private final int k;
 
+	private final Prediction prediction = new Prediction();
+	
 	public TopKItemsAggregator(int k) {
 		this.k = k;
 	}
@@ -39,15 +41,16 @@ public class TopKItemsAggregator implements CombinerAggregator<TopKItems> {
 		TopKItems initial = new TopKItems(this.k);
 
 		double[] ui = (double[]) tuple.get(0);
-		Collection<Long> ratedItems = (Collection<Long>) tuple.get(1);
-		MatrixBlock vq = (MatrixBlock) tuple.get(2);
+		double userBias = tuple.getDouble(1);
+		Collection<Long> ratedItems = (Collection<Long>) tuple.get(2);
+		MatrixBlock vq = (MatrixBlock) tuple.get(3);
 
 		double[] vj;
 		double score;
 		for (long item : vq.featureIndexes()) {
 			if (!ratedItems.contains(item)) {
 				vj = vq.getFeatures(item);
-				score = MathUtil.dot(ui, vj);
+				score = prediction.predict(ui, vj, userBias, vq.getBias(item));
 				initial.add(new Recommendation(item, score));
 				initial.ensureSize();
 			}

@@ -16,7 +16,7 @@
 package com.github.pmerienne.cf;
 
 import static com.github.pmerienne.cf.testing.dataset.DatasetUtils.extractEval;
-import static com.github.pmerienne.cf.testing.dataset.DatasetUtils.generateRatings;
+import static com.github.pmerienne.cf.testing.dataset.DatasetUtils.generateSparseRatings;
 import static com.github.pmerienne.cf.testing.dataset.DatasetUtils.removeRandomRatings;
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -85,10 +85,9 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_recommend_successfully() {
 		// Given
-		int recommendationSize = 5;
+		int recommendationSize = 2;
 		long testUser = 1;
-		List<Rating> allRatings = DatasetUtils.generateRatings(100, 200, true);
-		removeRandomRatings(testUser, 10, allRatings);
+		List<Rating> allRatings = generateSparseRatings(0.1, 100, 200, true);
 
 		Stream ratingsStream = this.topology.newStream("ratings", new FixedRatingsSpout(allRatings));
 		Stream recommendationQueryStream = this.topology.newDRPCStream("recommendations", this.drpc).each(new Fields("args"), new ExtractRecommendationsRequest(), new Fields("i"));
@@ -121,7 +120,7 @@ public class DSGDIntegrationTest {
 	public void should_predict_successfully() {
 		// Given
 		long testUser = 1;
-		List<Rating> allRatings = generateRatings(500, 200, true);
+		List<Rating> allRatings = generateSparseRatings(500, 200, true);
 		List<Rating> removedRatings = removeRandomRatings(testUser, 2, allRatings);
 		Rating rating1 = removedRatings.get(0);
 		Rating rating2 = removedRatings.get(1);
@@ -166,8 +165,8 @@ public class DSGDIntegrationTest {
 		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
-		double trainingRMSE = rmseEvaluator.rmse(training);
-		double evalRMSE = rmseEvaluator.rmse(eval);
+		double trainingRMSE = rmseEvaluator.normalizedRMSE(training);
+		double evalRMSE = rmseEvaluator.normalizedRMSE(eval);
 
 		assertThat(trainingRMSE).isLessThan(0.3);
 		assertThat(evalRMSE).isLessThan(0.3);
@@ -176,8 +175,8 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_override_old_ratings() {
 		// Given
-		List<Rating> originalTraining = generateRatings(0, 0, 500, 100, true);
-		List<Rating> newTraining = generateRatings(0, 0, 500, 100, false);
+		List<Rating> originalTraining = generateSparseRatings(500, 100, true);
+		List<Rating> newTraining = generateSparseRatings(500, 100, false);
 		List<Rating> training = new ArrayList<>();
 		training.addAll(originalTraining);
 		training.addAll(newTraining);
@@ -197,8 +196,8 @@ public class DSGDIntegrationTest {
 		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
-		double trainingRMSE = rmseEvaluator.rmse(newTraining);
-		double evalRMSE = rmseEvaluator.rmse(eval);
+		double trainingRMSE = rmseEvaluator.normalizedRMSE(newTraining);
+		double evalRMSE = rmseEvaluator.normalizedRMSE(eval);
 
 		assertThat(trainingRMSE).isLessThan(0.3);
 		assertThat(evalRMSE).isLessThan(0.3);
@@ -207,9 +206,9 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_support_concept_drift() {
 		// Given
-		List<Rating> firstConceptTraining = generateRatings(0, 0, 500, 100, true);
+		List<Rating> firstConceptTraining = generateSparseRatings(0, 0, 500, 100, true);
 		List<Rating> firstConceptEval = extractEval(firstConceptTraining, TRAINING_PERCENT);
-		List<Rating> secondConceptTraining = generateRatings(500, 100, 500, 100, false);
+		List<Rating> secondConceptTraining = generateSparseRatings(500, 100, 500, 100, false);
 		List<Rating> secondConceptEval = extractEval(secondConceptTraining, TRAINING_PERCENT);
 
 		RatingModelFromList ratingsModel = new RatingModelFromList();
@@ -232,10 +231,10 @@ public class DSGDIntegrationTest {
 		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
-		double firstConceptTrainingRMSE = rmseEvaluator.rmse(firstConceptTraining);
-		double firstConceptEvalRMSE = rmseEvaluator.rmse(firstConceptEval);
-		double secondConceptTrainingRMSE = rmseEvaluator.rmse(secondConceptTraining);
-		double secondConceptEvalRMSE = rmseEvaluator.rmse(secondConceptEval);
+		double firstConceptTrainingRMSE = rmseEvaluator.normalizedRMSE(firstConceptTraining);
+		double firstConceptEvalRMSE = rmseEvaluator.normalizedRMSE(firstConceptEval);
+		double secondConceptTrainingRMSE = rmseEvaluator.normalizedRMSE(secondConceptTraining);
+		double secondConceptEvalRMSE = rmseEvaluator.normalizedRMSE(secondConceptEval);
 
 		assertThat(firstConceptTrainingRMSE).isLessThan(0.3);
 		assertThat(firstConceptEvalRMSE).isLessThan(0.3);
@@ -260,9 +259,9 @@ public class DSGDIntegrationTest {
 		// When
 		this.cluster.submitTopology(this.getClass().getSimpleName(), config, topology.build());
 		Utils.sleep(BASE_TEST_TIMEOUT);
-		double originalRMSE = rmseEvaluator.rmse(eval);
+		double originalRMSE = rmseEvaluator.normalizedRMSE(eval);
 		Utils.sleep(BASE_TEST_TIMEOUT * 2);
-		double afterRMSE = rmseEvaluator.rmse(eval);
+		double afterRMSE = rmseEvaluator.normalizedRMSE(eval);
 
 		// Then
 		assertThat(afterRMSE - originalRMSE).isLessThan(0.01);

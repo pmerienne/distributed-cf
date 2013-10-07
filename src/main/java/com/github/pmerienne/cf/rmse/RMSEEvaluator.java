@@ -50,6 +50,16 @@ public class RMSEEvaluator {
 	}
 
 	public double rmse(List<Rating> ratings) {
+		RMSE rmse = this.getRMSE(ratings);
+		return rmse.get();
+	}
+	
+	public double normalizedRMSE(List<Rating> ratings) {
+		RMSE rmse = this.getRMSE(ratings);
+		return rmse.getNormalized();
+	}
+	
+	protected RMSE getRMSE(List<Rating> ratings) {
 		if (ratings.size() > MAX_SIZE) {
 			ratings = ListUtils.randomSubList(ratings, MAX_SIZE);
 		}
@@ -62,8 +72,8 @@ public class RMSEEvaluator {
 			actual = this.getPrediction(rating);
 			rmse.add(expected, actual);
 		}
-
-		return rmse.get();
+		
+		return rmse;
 	}
 
 	protected double getPrediction(Rating rating) {
