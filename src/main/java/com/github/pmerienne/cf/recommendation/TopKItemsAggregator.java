@@ -44,9 +44,9 @@ public class TopKItemsAggregator implements CombinerAggregator<TopKItems> {
 
 		double[] vj;
 		double score;
-		for (long item : vq.indexes()) {
+		for (long item : vq.featureIndexes()) {
 			if (!ratedItems.contains(item)) {
-				vj = vq.get(item);
+				vj = vq.getFeatures(item);
 				score = MathUtil.dot(ui, vj);
 				initial.add(new Recommendation(item, score));
 				initial.ensureSize();

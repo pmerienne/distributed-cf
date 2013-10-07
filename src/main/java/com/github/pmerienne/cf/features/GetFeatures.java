@@ -30,7 +30,7 @@ import backtype.storm.tuple.Values;
 import com.github.pmerienne.cf.block.MatrixBlock;
 import com.github.pmerienne.cf.util.IndexHelper;
 
-public class GetFeatures extends BaseQueryFunction<MapState<MatrixBlock>, double[]> {
+public class GetFeatures extends BaseQueryFunction<MapState<MatrixBlock>, MatrixBlock> {
 
 	private static final long serialVersionUID = 8168057749116807981L;
 
@@ -41,8 +41,8 @@ public class GetFeatures extends BaseQueryFunction<MapState<MatrixBlock>, double
 	}
 
 	@Override
-	public List<double[]> batchRetrieve(MapState<MatrixBlock> state, List<TridentTuple> tuples) {
-		List<double[]> features = new ArrayList<>(tuples.size());
+	public List<MatrixBlock> batchRetrieve(MapState<MatrixBlock> state, List<TridentTuple> tuples) {
+		List<MatrixBlock> results = new ArrayList<>(tuples.size());
 		List<List<Object>> keys;
 		MatrixBlock matrixBlock;
 
@@ -53,16 +53,22 @@ public class GetFeatures extends BaseQueryFunction<MapState<MatrixBlock>, double
 			keys = toKeys(blockIndex);
 			matrixBlock = singleValue(state.multiGet(keys));
 
-			double[] feature = matrixBlock != null ? matrixBlock.get(index) : null;
-			features.add(feature);
+			results.add(matrixBlock);
 		}
 
-		return features;
+		return results;
 	}
 
 	@Override
-	public void execute(TridentTuple tuple, double[] result, TridentCollector collector) {
-		collector.emit(new Values(result));
+	public void execute(TridentTuple tuple, MatrixBlock matrixBlock, TridentCollector collector) {
+		long index = tuple.getLong(0);
+
+		if (matrixBlock == null) {
+			collector.emit(new Values(null, null));
+		} else {
+			collector.emit(new Values(matrixBlock.getFeatures(index), matrixBlock.getBias(index)));
+		}
+
 	}
 
 }

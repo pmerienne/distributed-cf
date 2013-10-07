@@ -31,7 +31,7 @@ import com.github.pmerienne.cf.block.GetAllBlocksForUser;
 import com.github.pmerienne.cf.block.MatrixBlock;
 import com.github.pmerienne.cf.features.GetFeatures;
 import com.github.pmerienne.cf.math.BlockSGD;
-import com.github.pmerienne.cf.math.DotProduct;
+import com.github.pmerienne.cf.math.Prediction;
 import com.github.pmerienne.cf.rating.AssignRatingsToBlock;
 import com.github.pmerienne.cf.rating.GetRatedItems;
 import com.github.pmerienne.cf.rating.GetRatingsFromBlock;
@@ -139,11 +139,11 @@ public class DSGD {
 		// TODO : //
 		return predictionRequests
 		// Get user features
-				.stateQuery(this.userBlockState, new Fields("i"), new GetFeatures(options.d), new Fields("ui"))
+				.stateQuery(this.userBlockState, new Fields("i"), new GetFeatures(options.d), new Fields("ui", "bi"))
 				// Get item features
-				.stateQuery(this.itemBlockState, new Fields("j"), new GetFeatures(options.d), new Fields("vj"))
+				.stateQuery(this.itemBlockState, new Fields("j"), new GetFeatures(options.d), new Fields("vj", "bj"))
 				// dot product
-				.each(new Fields("ui", "vj"), new DotProduct(), new Fields("prediction"))
+				.each(new Fields("ui", "vj", "bi", "bj"), new Prediction(), new Fields("prediction"))
 				// Projects interesting fields
 				.project(new Fields("i", "j", "prediction"));
 	}

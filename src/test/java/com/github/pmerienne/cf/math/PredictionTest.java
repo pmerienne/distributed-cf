@@ -28,22 +28,26 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.tuple.Values;
 
-import com.github.pmerienne.cf.math.DotProduct;
+import com.github.pmerienne.cf.math.Prediction;
 import com.github.pmerienne.cf.util.MathUtil;
 
-public class DotProductTest {
+public class PredictionTest {
 
 	@Test
-	public void should_emit_dot_product() {
+	public void should_emit_dot_product_with_bias() {
 		// Given
-		DotProduct function = new DotProduct();
+		Prediction function = new Prediction();
 		TridentCollector collector = mock(TridentCollector.class);
 
 		double[] v1 = new double[] { nextDouble(), nextDouble(), nextDouble() };
 		double[] v2 = new double[] { nextDouble(), nextDouble(), nextDouble() };
+		double b1 = nextDouble();
+		double b2 = nextDouble();
 		TridentTuple tuple = mock(TridentTuple.class);
 		when(tuple.get(0)).thenReturn(v1);
 		when(tuple.get(1)).thenReturn(v2);
+		when(tuple.getDouble(2)).thenReturn(b1);
+		when(tuple.getDouble(3)).thenReturn(b2);
 
 		// When
 		function.execute(tuple, collector);
@@ -51,6 +55,6 @@ public class DotProductTest {
 		// Then
 		final ArgumentCaptor<Values> valuesCaptor = ArgumentCaptor.forClass(Values.class);
 		verify(collector).emit(valuesCaptor.capture());
-		assertThat((double)valuesCaptor.getValue().get(0)).isEqualTo(MathUtil.dot(v1, v2));
+		assertThat((double) valuesCaptor.getValue().get(0)).isEqualTo(MathUtil.dot(v1, v2) + b1 + b2);
 	}
 }

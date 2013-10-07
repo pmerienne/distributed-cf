@@ -32,13 +32,13 @@ public class MatrixBlockTest {
 		double[] vector1 = new double[] { 3.4, 5.6 };
 
 		// When
-		matrixBlock.set(0, vector0);
-		matrixBlock.set(1, vector1);
+		matrixBlock.setFeatures(0, vector0);
+		matrixBlock.setFeatures(1, vector1);
 
 		// Then
-		assertThat(matrixBlock.get(0)).isEqualTo(vector0, Delta.delta(10e-3));
-		assertThat(matrixBlock.get(1)).isEqualTo(vector1, Delta.delta(10e-3));
-		assertThat(matrixBlock.get(2)).isNull();
+		assertThat(matrixBlock.getFeatures(0)).isEqualTo(vector0, Delta.delta(10e-3));
+		assertThat(matrixBlock.getFeatures(1)).isEqualTo(vector1, Delta.delta(10e-3));
+		assertThat(matrixBlock.getFeatures(2)).isNull();
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class MatrixBlockTest {
 		MatrixBlock matrixBlock = new MatrixBlock();
 
 		// Then
-		assertThat(matrixBlock.get(0)).isNull();
+		assertThat(matrixBlock.getFeatures(0)).isNull();
 	}
 
 	@Test
@@ -57,9 +57,9 @@ public class MatrixBlockTest {
 		double[] vector0 = new double[] { 0.1, 1.2 };
 
 		// When
-		matrixBlock.set(0, vector0);
+		matrixBlock.setFeatures(0, vector0);
 
 		// Then
-		assertThat(matrixBlock.exists(0)).isTrue();
+		assertThat(matrixBlock.featuresExists(0)).isTrue();
 	}
 }

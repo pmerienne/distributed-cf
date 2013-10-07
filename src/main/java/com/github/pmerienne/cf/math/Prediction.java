@@ -22,21 +22,29 @@ import backtype.storm.tuple.Values;
 
 import com.github.pmerienne.cf.util.MathUtil;
 
-public class DotProduct extends BaseFunction {
+public class Prediction extends BaseFunction {
 
 	private static final long serialVersionUID = -3815389858150502634L;
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		Double value = null;
 
 		double[] userFeatures = (double[]) tuple.get(0);
 		double[] itemFeatures = (double[]) tuple.get(1);
+		Double userBias = tuple.getDouble(2);
+		Double itemBias = tuple.getDouble(3);
+
+		Double value = this.predict(userFeatures, itemFeatures, userBias, itemBias);
+		collector.emit(new Values(value));
+	}
+
+	public Double predict(double[] userFeatures, double[] itemFeatures, double userBias, double itemBias) {
+		Double value = null;
 		if (userFeatures != null && itemFeatures != null) {
-			value = MathUtil.dot(userFeatures, itemFeatures);
+			value = MathUtil.dot(userFeatures, itemFeatures) + userBias + itemBias;
 		}
 
-		collector.emit(new Values(value));
+		return value;
 	}
 
 }

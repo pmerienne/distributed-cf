@@ -20,15 +20,26 @@ import java.util.Set;
 
 public class MatrixBlock {
 
-	private final HashMap<Long, double[]> values;
+	private final HashMap<Long, double[]> features;
+	private final HashMap<Long, Double> biases;
 
 	public MatrixBlock() {
-		this.values = new HashMap<>();
+		this.features = new HashMap<>();
+		this.biases = new HashMap<>();
 	}
 
-	public double[] get(long i) {
-		double[] vector = this.values.get(i);
+	public double[] getFeatures(long i) {
+		double[] vector = this.features.get(i);
 		return vector;
+	}
+
+	public double getBias(long i) {
+		Double bias = this.biases.get(i);
+		return bias == null ? 0.0 : bias;
+	}
+
+	public void setBias(long i, double bias) {
+		this.biases.put(i, bias);
 	}
 
 	/**
@@ -37,15 +48,16 @@ public class MatrixBlock {
 	 * @param vector
 	 * @return the previous value, or <tt>null</tt> if there was value.
 	 */
-	public double[] set(long i, double[] vector) {
-		return this.values.put(i, vector);
+	public double[] setFeatures(long i, double[] vector) {
+		return this.features.put(i, vector);
 	}
 
-	public boolean exists(long i) {
-		return this.values.containsKey(i);
+	public boolean featuresExists(long i) {
+		return this.features.containsKey(i);
 	}
 
-	public Set<Long> indexes() {
-		return this.values.keySet();
+	public Set<Long> featureIndexes() {
+		return this.features.keySet();
 	}
+
 }

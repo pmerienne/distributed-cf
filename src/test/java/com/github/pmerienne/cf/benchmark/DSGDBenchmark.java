@@ -35,7 +35,7 @@ public class DSGDBenchmark {
 
 	public Map<Options, RMSEBenchmarkResult> run() {
 		int[] possibleKs = new int[] { 10 };
-		double[] possibleLambdas = new double[] { 0.1 };
+		double[] possibleLambdas = new double[] { 0.05 };
 		double[] possibleStepSizes = new double[] { 0.1 };
 
 		List<Options> options = this.createOptions(possibleKs, possibleLambdas, possibleStepSizes);

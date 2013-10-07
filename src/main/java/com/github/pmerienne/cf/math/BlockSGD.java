@@ -47,6 +47,8 @@ public class BlockSGD extends BaseFunction {
 	 * Features count
 	 */
 	private final int k;
+	
+	private final Prediction prediction = new Prediction();
 
 	public BlockSGD(double stepSize, double lambda, int k) {
 		super();
@@ -85,8 +87,11 @@ public class BlockSGD extends BaseFunction {
 	/**
 	 * <pre>
 	 * 
-	 * ui ← ui + η ⋅ (eui ⋅ vj - λ ⋅ ui )
-	 * vj ← vj + η ⋅ (eui ⋅ ui - λ ⋅ vj )
+	 * ui ← ui + η ⋅ (eui ⋅ vj - λ ⋅ ui)
+	 * vj ← vj + η ⋅ (eui ⋅ ui - λ ⋅ vj)
+	 * 
+	 * bu ← bu + η ⋅ (eui - λ ⋅ bu)
+	 * bi ← bi + η ⋅ (eui - λ ⋅ bi)
 	 * </pre>
 	 * 
 	 * @param up
@@ -95,33 +100,45 @@ public class BlockSGD extends BaseFunction {
 	 */
 	public void process(MatrixBlock up, MatrixBlock vq, Collection<Rating> ratings) {
 		// TODO : shuffle ratings
-
+		
 		for (Rating rating : ratings) {
 			long i = rating.getI();
 			long j = rating.getJ();
 			double value = rating.getValue();
 
-			double[] ui = up.get(i);
+			double[] ui = up.getFeatures(i);
 			if (ui == null) {
 				ui = this.randomVector();
 			}
 
-			double[] vj = vq.get(j);
+			double[] vj = vq.getFeatures(j);
 			if (vj == null) {
 				vj = this.randomVector();
 			}
 
+			double userBias = up.getBias(i);
+			double itemBias = vq.getBias(j);
+			
 			// eui = rui - uiT vj
-			double prediction = MathUtil.dot(ui, vj);
+			double prediction = this.prediction.predict(ui, vj, userBias, itemBias);
 			double eui = value - prediction;
 
 			// ui ← ui + η ⋅ (eui ⋅ vj - λ ⋅ ui )
 			double[] newUi = MathUtil.add(ui, MathUtil.mult(MathUtil.subtract(MathUtil.mult(vj, eui), MathUtil.mult(ui, lambda)), stepSize));
 			// vj ← vj + η ⋅ (eui ⋅ ui - λ ⋅ vj )
 			double[] newVj = MathUtil.add(vj, MathUtil.mult(MathUtil.subtract(MathUtil.mult(ui, eui), MathUtil.mult(vj, lambda)), stepSize));
+			
+			 // bu ← bu + η ⋅ (eui - λ ⋅ bu)
+			userBias = userBias + stepSize * (eui - lambda * userBias); 
+			
+			// bi ← bi + η ⋅ (eui - λ ⋅ bi)
+			itemBias = itemBias + stepSize * (eui - lambda * itemBias); 
 
-			up.set(i, newUi);
-			vq.set(j, newVj);
+			up.setFeatures(i, newUi);
+			up.setBias(i, userBias);
+			vq.setFeatures(j, newVj);
+			vq.setBias(j, itemBias);
+			
 		}
 	}
 
