@@ -17,66 +17,50 @@ package com.github.pmerienne.cf.block;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 public class Block implements Serializable {
 
 	private static final long serialVersionUID = 3640893414246976396L;
 
-	private long p;
-	private long q;
+	public long p;
+	public long q;
+	public int iteration;
 
 	public Block() {
 	}
 
 	public Block(long p, long q) {
-		super();
 		this.p = p;
 		this.q = q;
+		this.iteration = 0;
 	}
 
-	public long getP() {
-		return p;
-	}
-
-	public void setP(long p) {
+	public Block(long p, long q, int iteration) {
 		this.p = p;
-	}
-
-	public long getQ() {
-		return q;
-	}
-
-	public void setQ(long q) {
 		this.q = q;
+		this.iteration = iteration;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (p ^ (p >>> 32));
-		result = prime * result + (int) (q ^ (q >>> 32));
-		return result;
+		return new HashCodeBuilder().append(this.p).append(this.q).toHashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof Block))
 			return false;
 		Block other = (Block) obj;
-		if (p != other.p)
-			return false;
-		if (q != other.q)
-			return false;
-		return true;
+
+		return new EqualsBuilder().append(this.p, other.p).append(this.q, other.q).isEquals();
 	}
 
 	@Override
 	public String toString() {
-		return "Block [p=" + p + ", q=" + q + "]";
+		return new ToStringBuilder(this).append(this.q).append(this.p).append(this.iteration).toString();
 	}
 
 }

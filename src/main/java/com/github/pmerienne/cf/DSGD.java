@@ -107,7 +107,7 @@ public class DSGD {
 				// Get ratings
 				.stateQuery(this.ratingsBlockState, new Fields("p", "q"), new GetRatingsFromBlock(), new Fields("ratings"))
 				// Process blocks
-				.each(new Fields("up", "vq", "ratings"), new BlockSGD(options.stepSize, options.lambda, options.k), new Fields("newUp", "newVq")).parallelismHint((int) options.d);
+				.each(new Fields("up", "vq", "ratings", "iteration"), new BlockSGD(options.stepSize, options.lambda, options.k), new Fields("newUp", "newVq")).parallelismHint((int) options.d);
 
 		// Update Up
 		newBlocksStream.partitionPersist(options.userBlockStateFactory, new Fields("p", "newUp"), new MapPut()).parallelismHint((int) options.d);

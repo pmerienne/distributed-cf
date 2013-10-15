@@ -39,7 +39,7 @@ public class FileDatasetUtil {
 
 	private static Map<String, List<Rating>> LOADED_RATINGS = new HashMap<>();
 
-	public static List<Rating> getMovieLensRatings() {
+	public static List<Rating> getMovielensRatings() {
 		return get(MOVIELENS_FILE, MOVIELENS_PARSER);
 	}
 

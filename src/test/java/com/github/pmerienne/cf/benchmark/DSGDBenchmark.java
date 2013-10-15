@@ -69,7 +69,7 @@ public class DSGDBenchmark {
 	}
 
 	private RMSEBenchmarkResult computeRMSE(Options options) {
-		DSGDRunner benchmark = new DSGDRunner(FileDatasetUtil.getMovieLensRatings(), options, BENCHMARK_TIMEOUT);
+		DSGDRunner benchmark = new DSGDRunner(FileDatasetUtil.getMovielensRatings(), options, BENCHMARK_TIMEOUT);
 		return benchmark.run();
 	}
 

@@ -36,7 +36,7 @@ public class BlockSGD extends BaseFunction {
 	/**
 	 * Step size
 	 */
-	private final double stepSize;
+	private final double initialStepSize;
 
 	/**
 	 * Penalty parameter
@@ -52,7 +52,7 @@ public class BlockSGD extends BaseFunction {
 
 	public BlockSGD(double stepSize, double lambda, int k) {
 		super();
-		this.stepSize = stepSize;
+		this.initialStepSize = stepSize;
 		this.lambda = lambda;
 		this.k = k;
 	}
@@ -75,8 +75,10 @@ public class BlockSGD extends BaseFunction {
 			if (ratings == null) {
 				ratings = new HashSet<>();
 			}
+			
+			int iteration = tuple.getInteger(3);
 
-			this.process(up, vq, ratings);
+			this.process(up, vq, ratings, iteration);
 			collector.emit(new Values(up, vq));
 		} catch (NullPointerException npe) {
 			// missing parameters
@@ -97,10 +99,12 @@ public class BlockSGD extends BaseFunction {
 	 * @param up
 	 * @param vq
 	 * @param ratings
+	 * @param iteration 
 	 */
-	public void process(MatrixBlock up, MatrixBlock vq, Collection<Rating> ratings) {
+	public void process(MatrixBlock up, MatrixBlock vq, Collection<Rating> ratings, int iteration) {
 		// TODO : shuffle ratings
 		
+		double stepSize = 2 * initialStepSize / (iteration + 1);
 		for (Rating rating : ratings) {
 			long i = rating.getI();
 			long j = rating.getJ();

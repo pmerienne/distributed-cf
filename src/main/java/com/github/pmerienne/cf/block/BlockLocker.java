@@ -92,7 +92,7 @@ public class BlockLocker implements Serializable {
 	}
 
 	protected boolean isUnlocked(Block block) {
-		return !this.lockedRows.contains(block.getP()) && !this.lockedColumns.contains(block.getQ());
+		return !this.lockedRows.contains(block.p) && !this.lockedColumns.contains(block.q);
 	}
 
 	protected synchronized void refreshLockedRowsAndColumns() {
@@ -100,8 +100,8 @@ public class BlockLocker implements Serializable {
 		this.lockedColumns.clear();
 
 		for (Block lockedBlock : this.lockedBlocks) {
-			this.lockedRows.add(lockedBlock.getP());
-			this.lockedColumns.add(lockedBlock.getQ());
+			this.lockedRows.add(lockedBlock.p);
+			this.lockedColumns.add(lockedBlock.q);
 		}
 	}
 }

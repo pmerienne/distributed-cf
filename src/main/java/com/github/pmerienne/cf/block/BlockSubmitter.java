@@ -68,7 +68,8 @@ public class BlockSubmitter extends BaseRichSpout {
 	public void nextTuple() {
 		Set<Block> unlockedBlocks = this.blockLocker.getAndLockRandomBlocks();
 		for (Block block : unlockedBlocks) {
-			this.collector.emit(new Values(block.getP(), block.getQ()), block);
+			block.iteration++;
+			this.collector.emit(new Values(block.p, block.q, block.iteration), block);
 		}
 
 		Utils.sleep(1);
@@ -88,7 +89,7 @@ public class BlockSubmitter extends BaseRichSpout {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("p", "q"));
+		declarer.declare(new Fields("p", "q", "iteration"));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

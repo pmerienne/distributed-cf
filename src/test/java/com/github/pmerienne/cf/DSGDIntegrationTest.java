@@ -149,14 +149,11 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_learn_movielens100k_dataset() {
 		// Given
-		List<Rating> training = FileDatasetUtil.getMovieLensRatings();
+		List<Rating> training = FileDatasetUtil.getMovielensRatings();
 		List<Rating> eval = DatasetUtils.extractEval(training, TRAINING_PERCENT);
 
 		Stream ratingsStream = this.topology.newStream("ratings", new FixedRatingsSpout(training));
-		Stream predictionQueryStream = this.topology.newDRPCStream("predictions", this.drpc).each(new Fields("args"), new ExtractPredictionRequest(), new Fields("i", "j"));
-
 		DSGD dsgd = new DSGD(this.topology, ratingsStream, options, config);
-		dsgd.addPredictionStream(predictionQueryStream);
 
 		RMSEEvaluator rmseEvaluator = new RMSEEvaluator(dsgd, topology, drpc);
 
@@ -165,11 +162,8 @@ public class DSGDIntegrationTest {
 		Utils.sleep(BASE_TEST_TIMEOUT);
 
 		// Then
-		double trainingRMSE = rmseEvaluator.normalizedRMSE(training);
-		double evalRMSE = rmseEvaluator.normalizedRMSE(eval);
-
-		assertThat(trainingRMSE).isLessThan(0.3);
-		assertThat(evalRMSE).isLessThan(0.3);
+		double evalRMSE = rmseEvaluator.rmse(eval);
+		assertThat(evalRMSE).isLessThan(0.95);
 	}
 
 	@Test
@@ -245,7 +239,7 @@ public class DSGDIntegrationTest {
 	@Test
 	public void should_not_overfit() {
 		// Given
-		List<Rating> training = FileDatasetUtil.getMovieLensRatings();
+		List<Rating> training = FileDatasetUtil.getMovielensRatings();
 		List<Rating> eval = DatasetUtils.extractEval(training, TRAINING_PERCENT);
 
 		Stream ratingsStream = this.topology.newStream("ratings", new FixedRatingsSpout(training));
