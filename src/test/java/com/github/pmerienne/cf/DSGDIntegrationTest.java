@@ -61,19 +61,20 @@ public class DSGDIntegrationTest {
 
 	@Before
 	public void init() {
-		this.cluster = new LocalCluster();
-		this.drpc = new LocalDRPC();
-		this.topology = new TridentTopology();
+		cluster = new LocalCluster();
+		drpc = new LocalDRPC();
+		topology = new TridentTopology();
 
-		this.options = new Options();
-		this.options.d = 10;
-		this.options.k = 10;
-		this.options.lambda = 0.1;
-		this.options.stepSize = 0.1;
-		this.options.newRatingsParallelism = 1;
-		this.options.recommendationsParallelism = 1;
+		options = new Options();
+		options.d = 10;
+		options.k = 10;
+		options.iterations = 30;
+		options.lambda = 0.1;
+		options.stepSize = 0.1;
+		options.newRatingsParallelism = 5;
+		options.recommendationsParallelism = 5;
 
-		this.config = new Config();
+		config = new Config();
 	}
 
 	@After

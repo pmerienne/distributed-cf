@@ -39,6 +39,14 @@ public class BlockLocker implements Serializable {
 		this.toProcesses.add(block);
 	}
 
+	public synchronized void remove(Block block) {
+		this.toProcesses.add(block);
+	}
+
+	public boolean hasBlocks() {
+		return !this.toProcesses.isEmpty();
+	}
+
 	public synchronized Block getAndLockRandomBlock() {
 		Block unlockedBlock = Iterables.tryFind(this.toProcesses, new Predicate<Block>() {
 			@Override

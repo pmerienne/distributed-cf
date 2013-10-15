@@ -40,8 +40,10 @@ public class BlockSubmitter extends BaseRichSpout {
 	private BlockLocker blockLocker;
 
 	private long d;
+	private int iterations;
 
-	public BlockSubmitter(long d) {
+	public BlockSubmitter(long d, int iterations) {
+		this.iterations = iterations;
 		this.blockLocker = new BlockLocker();
 		this.d = d;
 		this.init();
@@ -79,6 +81,9 @@ public class BlockSubmitter extends BaseRichSpout {
 	public void ack(Object msgId) {
 		Block block = (Block) msgId;
 		this.blockLocker.unlock(block);
+		if (block.iteration > iterations) {
+			this.blockLocker.remove(block);
+		}
 	}
 
 	@Override

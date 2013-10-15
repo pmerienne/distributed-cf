@@ -100,7 +100,7 @@ public class DSGD {
 	}
 
 	private void processDSGD() {
-		Stream newBlocksStream = this.topology.newStream("blocksToProcess", new RichSpoutBatchExecutor(new BlockSubmitter(options.d), 1)).shuffle()
+		Stream newBlocksStream = this.topology.newStream("blocksToProcess", new RichSpoutBatchExecutor(new BlockSubmitter(options.d, options.iterations), 1)).shuffle()
 		// TODO : //
 		// Get blocks
 				.stateQuery(this.userBlockState, new Fields("p"), new MapGet(), new Fields("up")).stateQuery(this.itemBlockState, new Fields("q"), new MapGet(), new Fields("vq"))
@@ -152,8 +152,9 @@ public class DSGD {
 		public long d = 100;
 		public int k = 10;
 
-		public double stepSize = 0.001;
-		public double lambda = 0.001;
+		public double stepSize = 0.1;
+		public double lambda = 0.1;
+		public int iterations = 30;
 
 		public int recommendationsParallelism = 10;
 		public int newRatingsParallelism = 10;
